@@ -127,8 +127,7 @@ namespace Parking_App.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Vehiculos_IdTipoVehiculo",
                 table: "Vehiculos",
-                column: "IdTipoVehiculo",
-                unique: true);
+                column: "IdTipoVehiculo");
         }
 
         /// <inheritdoc />

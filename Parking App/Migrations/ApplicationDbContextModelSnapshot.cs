@@ -148,8 +148,7 @@ namespace Parking_App.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdTipoVehiculo")
-                        .IsUnique();
+                    b.HasIndex("IdTipoVehiculo");
 
                     b.ToTable("Vehiculos");
                 });
@@ -183,8 +182,8 @@ namespace Parking_App.Migrations
             modelBuilder.Entity("Parking_App.Entities.Vehiculo", b =>
                 {
                     b.HasOne("Parking_App.Entities.TipoVehiculo", "TipoVehiculo")
-                        .WithOne("Vehiculo")
-                        .HasForeignKey("Parking_App.Entities.Vehiculo", "IdTipoVehiculo")
+                        .WithMany()
+                        .HasForeignKey("IdTipoVehiculo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -194,11 +193,6 @@ namespace Parking_App.Migrations
             modelBuilder.Entity("Parking_App.Entities.Ticket", b =>
                 {
                     b.Navigation("Estancia");
-                });
-
-            modelBuilder.Entity("Parking_App.Entities.TipoVehiculo", b =>
-                {
-                    b.Navigation("Vehiculo");
                 });
 
             modelBuilder.Entity("Parking_App.Entities.Vehiculo", b =>

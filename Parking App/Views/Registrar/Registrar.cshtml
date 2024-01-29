@@ -1,0 +1,31 @@
+﻿@model NuevoVehiculoViewModel
+@{
+	ViewBag.Title = "Registrar vehiculos";
+}
+
+<h1>Registrar vehiculos</h1>
+
+<div class="constainer">
+	<h5>Aqui puede agregar los vehiculos que frecuentan el estacionamiento y tienen una tarifa especial.</h5>
+
+	<form asp-action="Registrar">
+		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+		<div class="mb-3">
+			<label asp-for="Placa" class="form-label"></label>
+			<input asp-for="Placa" class="form-control" />
+			<span asp-validation-for="Placa" class="text-danger"></span>
+		</div>
+		<div class="mb-3">
+			<label asp-for="IdTipoVehiculo" class="form-label"></label>
+			<select asp-for="IdTipoVehiculo" class="form-control" asp-items="Model.TipoVehiculos"></select>
+			<span asp-validation-for="IdTipoVehiculo" class="text-danger"></span>
+		</div>
+		<button type="submit" class="btn btn-primary">Guardar</button>
+		<a class="btn btn-secondary" asp-action="Index">Cancelar</a>
+	</form>
+
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

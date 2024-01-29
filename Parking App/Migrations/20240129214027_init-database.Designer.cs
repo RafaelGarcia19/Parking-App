@@ -12,7 +12,7 @@ using Parking_App;
 namespace Parking_App.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240129164309_init-database")]
+    [Migration("20240129214027_init-database")]
     partial class initdatabase
     {
         /// <inheritdoc />
@@ -151,8 +151,7 @@ namespace Parking_App.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdTipoVehiculo")
-                        .IsUnique();
+                    b.HasIndex("IdTipoVehiculo");
 
                     b.ToTable("Vehiculos");
                 });
@@ -186,8 +185,8 @@ namespace Parking_App.Migrations
             modelBuilder.Entity("Parking_App.Entities.Vehiculo", b =>
                 {
                     b.HasOne("Parking_App.Entities.TipoVehiculo", "TipoVehiculo")
-                        .WithOne("Vehiculo")
-                        .HasForeignKey("Parking_App.Entities.Vehiculo", "IdTipoVehiculo")
+                        .WithMany()
+                        .HasForeignKey("IdTipoVehiculo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -197,11 +196,6 @@ namespace Parking_App.Migrations
             modelBuilder.Entity("Parking_App.Entities.Ticket", b =>
                 {
                     b.Navigation("Estancia");
-                });
-
-            modelBuilder.Entity("Parking_App.Entities.TipoVehiculo", b =>
-                {
-                    b.Navigation("Vehiculo");
                 });
 
             modelBuilder.Entity("Parking_App.Entities.Vehiculo", b =>
