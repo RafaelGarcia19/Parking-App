@@ -1,10 +1,7 @@
 ﻿@model SalidaViewModel
 
 @{
-	ViewBag.Title = "Salida";
-	TimeSpan horasTotales = (TimeSpan)(Model.HoraSalida - Model.HoraIngreso);
-	int horas = (int)(horasTotales.TotalHours);
-
+	ViewBag.Title = "Marcar salida";
 }
 
 <h1>Salida</h1>
@@ -20,7 +17,7 @@
 				<th scope="col">Placa</th>
 				<th scope="col">Hora de entrada</th>
 				<th scope="col">Hora de salida</th>
-				<th scope="col">Tiempo de estancia</th>
+				<th scope="col">Tiempo de estancia (Min) </th>
 				<th scope="col">Total a pagar</th>
 			</tr>
 		</thead>
@@ -29,7 +26,7 @@
 				<td>@Model.Placa</td>
 				<td>@Model.HoraIngreso</td>
 				<td>@Model.HoraSalida</td>
-				<td>@horas </td>
+				<td>@Model.TiempoEstancia min </td>
 				<td>@Model.ValorAPagar</td>
 			</tr>
 		</tbody>

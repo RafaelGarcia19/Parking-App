@@ -14,7 +14,7 @@ namespace Parking_App.Entities
 		public decimal ImporteCobrado { get; set; }
 
 		[Required(ErrorMessage = "El campo {0} es requerido")]
-		public int HorasCobradas { get; set; }
+		public int MinutosCobrados { get; set; }
 
 		[ForeignKey("Vehiculo")]
 		public int VehiculoId { get; set; }

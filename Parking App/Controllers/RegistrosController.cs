@@ -35,19 +35,12 @@ namespace Parking_App.Controllers
 		public IActionResult Salida(int id)
 		{
 			var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == id);
-
 			if (estancia == null)
 				return RedirectToAction("Index");
 			estancia.HoraSalida = DateTime.Now;
-			// Calcula las horas totales de estancia
-			TimeSpan horasTotales = (TimeSpan)(estancia.HoraSalida - estancia.HoraIngreso);
-
-			// Obtiene la tarifa por hora según el tipo de vehículo
-			double tarifaPorHora = (double)estancia.Vehiculo.TipoVehiculo.Tarifa;
-
-			// Calcula el valor a pagar multiplicando las horas totales por la tarifa por hora
-			double valorAPagar = Math.Round((int)horasTotales.TotalHours * tarifaPorHora, 2);
-
+			var totalMinutes = calculateMinutes(estancia.HoraIngreso, estancia.HoraSalida.Value);
+			double tarifaPorMinuto = (double)estancia.Vehiculo.TipoVehiculo.Tarifa;
+			double valorAPagar = Math.Round(totalMinutes * tarifaPorMinuto, 2);
 			var model = new SalidaViewModel
 			{
 				Id = estancia.Id,
@@ -56,9 +49,9 @@ namespace Parking_App.Controllers
 				TipoVehiculo = estancia.Vehiculo.TipoVehiculo.Nombre,
 				Placa = estancia.Vehiculo.Placa,
 				ValorAPagar = valorAPagar,
-				VehiculoId = estancia.VehiculoId
+				VehiculoId = estancia.VehiculoId,
+				TiempoEstancia = totalMinutes
 			};
-
 			return View(model);
 		}
 
@@ -67,28 +60,35 @@ namespace Parking_App.Controllers
 		{
 			if (!ModelState.IsValid)
 				return View(model);
-			var estancia = context.Estancias.FirstOrDefault(x => x.Id == model.Id);
+			var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == model.Id);
 			if (estancia == null)
 				return RedirectToAction("Index");
-			TimeSpan horasTotales = (TimeSpan)(model.HoraSalida - model.HoraIngreso);
-			var estanciasList = new List<Estancia>
+			try
 			{
-				estancia
-			};
-			var ticket = new Ticket
+				if (estancia.Vehiculo.TipoVehiculo.Nombre == "No Residente")
+				{
+					var totalMinutes = calculateMinutes(estancia.HoraIngreso, model.HoraSalida);
+					var estanciasList = new List<Estancia> { estancia };
+					var ticket = new Ticket
+					{
+						HoraEmision = DateTime.Now,
+						ImporteCobrado = (decimal)model.ValorAPagar,
+						MinutosCobrados = totalMinutes,
+						VehiculoId = estancia.VehiculoId,
+						Estancia = estanciasList
+					};
+					context.Ticket.Add(ticket);
+				}
+				estancia.HoraSalida = model.HoraSalida;
+				context.Estancias.Update(estancia);
+				await context.SaveChangesAsync();
+				return RedirectToAction("Index");
+			}
+			catch (Exception ex)
 			{
-				HoraEmision = DateTime.Now,
-				ImporteCobrado = (decimal)model.ValorAPagar,
-				HorasCobradas = (int)horasTotales.TotalHours,
-				VehiculoId = estancia.VehiculoId,
-				Estancia = estanciasList
-			};
-			context.Ticket.Add(ticket);
-			await context.SaveChangesAsync();
-			estancia.HoraSalida = model.HoraSalida;
-			context.Estancias.Update(estancia);
-			await context.SaveChangesAsync();
-			return RedirectToAction("Index");
+				ModelState.AddModelError(string.Empty, $"Ocurrió un error al registrar la salida: {ex.Message}");
+				return View(model);
+			}
 		}
 
 
@@ -123,6 +123,12 @@ namespace Parking_App.Controllers
 
 		}
 
+		private int calculateMinutes(DateTime horaIngreso, DateTime horaSalida)
+		{
+			TimeSpan horasTotales = horaSalida - horaIngreso;
+			return (int)horasTotales.TotalMinutes;
+		}
+
 		private async Task<Vehiculo?> ObtenerOVCrearVehiculo(string placa)
 		{
 			var vehiculo = await context.Vehiculos.FirstOrDefaultAsync(v => v.Placa == placa);
@@ -135,7 +141,6 @@ namespace Parking_App.Controllers
 					IdTipoVehiculo = vehiculoNoResidente?.Id ?? 0, // Asignar un valor por defecto en caso de que no se encuentre el tipo de vehículo
 					Estado = true
 				};
-
 				context.Vehiculos.Add(vehiculo);
 				await context.SaveChangesAsync();
 			}

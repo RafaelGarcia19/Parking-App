@@ -12,5 +12,6 @@ namespace Parking_App.Models
 		[DisplayFormat(DataFormatString = "{3:C2}")]
 		public double ValorAPagar { get; set; }
 		public int VehiculoId { get; set; }
+		public int TiempoEstancia { get; set; }
 	}
 }
