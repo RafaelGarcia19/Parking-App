@@ -1,5 +1,25 @@
-﻿@{
+﻿@model RegistroEntradaViewModel
+@{
 	ViewBag.Title = "Entrada";
 }
 
 <h1>Entrada</h1>
+
+<div class="container">
+	<form asp-action="Entrada">
+		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+		<div class="mb-3">
+			<label asp-for="Placa" class="form-label"></label>
+			<input asp-for="Placa" class="form-control" />
+			<span asp-validation-for="Placa" class="text-danger"></span>
+			<span class="text-muted">Si el vehiculo no se encuentra registrado se registrara como "No residente"</span>
+		</div>
+		<div class="mb-3">
+			<label asp-for="HoraIngreso" class="form-label"></label>
+			<input asp-for="HoraIngreso" class="form-control" />
+			<span asp-validation-for="HoraIngreso" class="text-danger"></span>
+		</div>
+		<button type="submit" class="btn btn-primary">Registrar</button>
+		<a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancelar</a>
+	</form>
+</div>

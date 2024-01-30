@@ -17,7 +17,5 @@ namespace Parking_App.Entities
 		public int VehiculoId { get; set; }
 		public Vehiculo Vehiculo { get; set; }
 
-		public DateTime FechaInicio { get; set; }
-		public DateTime? FechaFin { get; set; }
 	}
 }

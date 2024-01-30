@@ -1,0 +1,42 @@
+﻿@model IEnumerable<EstanciaViewModel>
+@{
+	ViewBag.Title = "Vehiculos en parqueo";
+}
+
+<h1>Vehiculos en parqueo</h1>
+
+<div class="container">
+	@if (Model.Count() == 0)
+	{
+		<h5>No hay vehiculos en parqueo</h5>
+	}
+	else
+	{
+		<h3>Hay @Model.Count() vehiculos en parqueo</h3>
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Placa</th>
+					<th>Hora de ingreso</th>
+					<th>Tipo de vehiculo</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var parqueo in Model)
+				{
+					<tr>
+						<td>@parqueo.Placa</td>
+						<td>@parqueo.HoraIngreso</td>
+						<td>@parqueo.TipoVehiculo</td>
+						<td>
+							<a asp-action="Salida" asp-route-id="@parqueo.Id" class="btn btn-primary">Marcar salida</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	<a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Regresar</a>
+
+</div>

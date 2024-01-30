@@ -26,6 +26,7 @@ namespace Parking_App.Controllers
 				Placa = x.Placa,
 				TipoVehiculo = x.TipoVehiculo.Nombre,
 				Estado = x.Estado
+				
 			});
 			return View(model);
 		}
@@ -56,7 +57,7 @@ namespace Parking_App.Controllers
 				model.TipoVehiculos = await GetTipoVehiculos();
 				return View(model);
 			}
-			if (context.Vehiculos.Any(v => v.Placa == model.Placa))
+			if (context.Vehiculos.Any(v => v.Placa == model.Placa.ToUpper()))
 			{
 				ModelState.AddModelError("Placa", "La placa ya está registrada.");
 				model.TipoVehiculos = await GetTipoVehiculos();
@@ -64,7 +65,7 @@ namespace Parking_App.Controllers
 			}
 			var vehiculo = new Vehiculo
 			{
-				Placa = model.Placa,
+				Placa = model.Placa.ToUpper(),
 				IdTipoVehiculo = model.IdTipoVehiculo,
 				Estado = true
 			};

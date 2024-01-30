@@ -1,5 +1,49 @@
-﻿@{
+﻿@model SalidaViewModel
+
+@{
 	ViewBag.Title = "Salida";
+	TimeSpan horasTotales = (TimeSpan)(Model.HoraSalida - Model.HoraIngreso);
+	int horas = (int)(horasTotales.TotalHours);
+
 }
 
 <h1>Salida</h1>
+
+<h5>
+	Confirmar salida de vehiculo con placa: <b>@Model.Placa</b> a las <b>@Model.HoraSalida</b> con un total de
+</h5>
+
+<div class="container">
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">Placa</th>
+				<th scope="col">Hora de entrada</th>
+				<th scope="col">Hora de salida</th>
+				<th scope="col">Tiempo de estancia</th>
+				<th scope="col">Total a pagar</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>@Model.Placa</td>
+				<td>@Model.HoraIngreso</td>
+				<td>@Model.HoraSalida</td>
+				<td>@horas </td>
+				<td>@Model.ValorAPagar</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<form asp-action="Salida">
+	<input type="hidden" asp-for="Placa" />
+	<input type="hidden" asp-for="HoraIngreso" />
+	<input type="hidden" asp-for="HoraSalida" />
+	<input type="hidden" asp-for="TipoVehiculo" />
+	<input type="hidden" asp-for="Placa" />
+	<input type="hidden" asp-for="ValorAPagar" />
+	<input type="hidden" asp-for="VehiculoId" />
+	<button type="submit" class="btn btn-primary">Confirmar</button>
+	<a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
