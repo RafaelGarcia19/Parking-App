@@ -1,0 +1,4 @@
+Núm. placa	Tiempo estacionado (min.)	Cantidad a pagar
+P12345	1500	75
+P102103	0	0
+P12325	3	0.15

@@ -225,24 +225,34 @@ namespace Parking_App.Controllers
 		{
 			var informeData = ObtenerDatosInforme();
 			var filePath = GuardarInformeEnArchivo(nombreArchivo, informeData);
+			byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
 
-			// Retorna un FileResult para que el navegador descargue el archivo
-			return File(filePath, "text/plain", $"{nombreArchivo}.txt");
+			return File(fileBytes, "text/plain", $"{nombreArchivo}.txt");
 		}
 
 		private IEnumerable<InformeViewModel> ObtenerDatosInforme()
 		{
-			throw new NotImplementedException();
+			var residente = "Residente";
+			var dateTime = DateTime.Now;
+			var informeData = context.Vehiculos.Include(x => x.TipoVehiculo).Include(x => x.Estancia).Where(x => x.TipoVehiculo.Nombre == residente).ToList();
+			IEnumerable<InformeViewModel> data = informeData.Select(x => new InformeViewModel
+			{
+				NumPlaca = x.Placa,
+				TiempoEstacionado = x.Estancia.Where(x => x.HoraSalida != null).Sum(x => calculateMinutes(x.HoraIngreso, x.HoraSalida.Value)),
+				CantidadPagar = Math.Round(x.Estancia.Where(x => x.HoraSalida != null).Sum(x => calculateMinutes(x.HoraIngreso, x.HoraSalida.Value)) * (double)x.TipoVehiculo.Tarifa, 2)
+			});
+			return data;
 		}
 
 		private string GuardarInformeEnArchivo(string nombreArchivo, IEnumerable<InformeViewModel> informeData)
 		{
 			// Lógica para guardar los datos en el archivo con el formato especificado
-			var filePath = Path.Combine("wwwroot/informes", $"{nombreArchivo}.txt");
+			var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "informes");
+			var filePath = Path.Combine(path, $"{nombreArchivo}.txt");
 
 			try
 			{
-				using (StreamWriter sw = new StreamWriter(filePath))
+				using (StreamWriter sw = new(filePath))
 				{
 					sw.WriteLine("Núm. placa\tTiempo estacionado (min.)\tCantidad a pagar");
 

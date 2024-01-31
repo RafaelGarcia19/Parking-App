@@ -1,4 +1,14 @@
-﻿@{
+﻿@model string
+@{
 	ViewBag.Title = "Pago tarifa residentes";
 }
 <h1>Pago tarifa residentes</h1>
+
+<div class="container">
+	<form asp-action="GenerarInforme" method="post">
+		<label for="nombreArchivo">Nombre del Archivo:</label>
+		<input class="form-control" type="text" name="nombreArchivo" required />
+		<br />
+		<button class="btn btn-primary" type="submit">Generar Informe</button>
+	</form>
+</div>
