@@ -17,8 +17,25 @@
 				<th scope="col">Placa</th>
 				<th scope="col">Hora de entrada</th>
 				<th scope="col">Hora de salida</th>
-				<th scope="col">Tiempo de estancia (Min) </th>
-				<th scope="col">Total a pagar</th>
+				<th scope="col">
+					@if (Model.TipoVehiculo == "Residente")
+					{
+						<label>Tiempo de estancia total (Min)</label>
+					}
+					else
+					{
+						<label>Tiempo de estancia (Min)</label>
+					}
+				<th scope="col">
+						@if (Model.TipoVehiculo == "Residente")
+						{
+						<label>Valor a pagar acumulado</label>
+						}
+						else
+						{
+						<label>Valor a pagar</label>
+						}
+				</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -27,7 +44,7 @@
 				<td>@Model.HoraIngreso</td>
 				<td>@Model.HoraSalida</td>
 				<td>@Model.TiempoEstancia min </td>
-				<td>@Model.ValorAPagar</td>
+				<td>MXN $@Model.ValorAPagar</td>
 			</tr>
 		</tbody>
 	</table>

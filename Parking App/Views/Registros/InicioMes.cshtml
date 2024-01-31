@@ -1,5 +1,18 @@
-﻿@{
+﻿@model InicioMesViewModel
+@{
 	ViewBag.Title = "Inicio de mes";
 }
 
 <h1>Inicio de mes</h1>
+
+<div class="container">
+	<form asp-action="InicioMes">
+		<p>
+			¿Desea iniciar el mes? Se procederá a vaciar el historial de registros para vehiculos <strong>Oficiales</strong> y se reinicia el contador a los vehiculos <strong>Residentes</strong>.
+		</p>
+		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+		<input type="hidden" asp-for="Procesar" />
+		<button type="submit" class="btn btn-success">Procesar</button>
+		<a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancelar</a>
+	</form>
+</div>

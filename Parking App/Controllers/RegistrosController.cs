@@ -37,8 +37,17 @@ namespace Parking_App.Controllers
 			var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == id);
 			if (estancia == null)
 				return RedirectToAction("Index");
+			var totalMinutes = 0;
+			if (estancia.Vehiculo.TipoVehiculo.Nombre == "Residente")
+			{
+				var estancias = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).Where(x => x.VehiculoId == estancia.VehiculoId).Where(x => x.HoraSalida != null).ToList();
+				foreach (var item in estancias)
+				{
+					totalMinutes += calculateMinutes(item.HoraIngreso, item.HoraSalida.Value);
+				}
+			}
 			estancia.HoraSalida = DateTime.Now;
-			var totalMinutes = calculateMinutes(estancia.HoraIngreso, estancia.HoraSalida.Value);
+			totalMinutes += calculateMinutes(estancia.HoraIngreso, estancia.HoraSalida.Value);
 			double tarifaPorMinuto = (double)estancia.Vehiculo.TipoVehiculo.Tarifa;
 			double valorAPagar = Math.Round(totalMinutes * tarifaPorMinuto, 2);
 			var model = new SalidaViewModel
@@ -58,28 +67,20 @@ namespace Parking_App.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Salida(SalidaViewModel model)
 		{
+			var NoResidente = "No Residente";
+			var Residente = "Residente";
 			if (!ModelState.IsValid)
 				return View(model);
-			var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == model.Id);
-			if (estancia == null)
-				return RedirectToAction("Index");
 			try
 			{
-				if (estancia.Vehiculo.TipoVehiculo.Nombre == "No Residente")
-				{
-					var totalMinutes = calculateMinutes(estancia.HoraIngreso, model.HoraSalida);
-					var estanciasList = new List<Estancia> { estancia };
-					var ticket = new Ticket
-					{
-						HoraEmision = DateTime.Now,
-						ImporteCobrado = (decimal)model.ValorAPagar,
-						MinutosCobrados = totalMinutes,
-						VehiculoId = estancia.VehiculoId,
-						Estancia = estanciasList
-					};
-					context.Ticket.Add(ticket);
-				}
+				var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == model.Id);
+				if (estancia == null)
+					return RedirectToAction("Index");
+				if (estancia.Vehiculo.TipoVehiculo.Nombre == NoResidente)
+					CrearTicket(model, estancia);
 				estancia.HoraSalida = model.HoraSalida;
+				if (estancia.Vehiculo.TipoVehiculo.Nombre != Residente)
+					estancia.Pagado = true;
 				context.Estancias.Update(estancia);
 				await context.SaveChangesAsync();
 				return RedirectToAction("Index");
@@ -91,6 +92,20 @@ namespace Parking_App.Controllers
 			}
 		}
 
+		private void CrearTicket(SalidaViewModel model, Estancia estancia)
+		{
+			var totalMinutes = calculateMinutes(estancia.HoraIngreso, model.HoraSalida);
+			var estanciasList = new List<Estancia> { estancia };
+			var ticket = new Ticket
+			{
+				HoraEmision = DateTime.Now,
+				ImporteCobrado = (decimal)model.ValorAPagar,
+				MinutosCobrados = totalMinutes,
+				VehiculoId = estancia.VehiculoId,
+				Estancia = estanciasList
+			};
+			context.Ticket.Add(ticket);
+		}
 
 		[HttpGet]
 		public IActionResult Entrada()
@@ -167,7 +182,82 @@ namespace Parking_App.Controllers
 		[HttpGet]
 		public IActionResult InicioMes()
 		{
-			return View();
+			var model = new InicioMesViewModel();
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> InicioMes(InicioMesViewModel model)
+		{
+			var oficial = "Oficial";
+			var residente = "Residente";
+			if (!ModelState.IsValid)
+				return View(model);
+			try
+			{
+				var estancias = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).Where(x => x.Vehiculo.TipoVehiculo.Nombre == oficial).ToList();
+				foreach (Estancia item in estancias)
+				{
+					context.Estancias.Remove(item);
+				}
+
+				var estanciasResidentes = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).Where(x => x.Vehiculo.TipoVehiculo.Nombre == residente).ToList();
+				foreach (Estancia item in estanciasResidentes)
+				{
+					if (item.HoraSalida == null)
+						item.HoraSalida = DateTime.Now;
+					item.Pagado = true;
+					context.Estancias.Update(item);
+				}
+				await context.SaveChangesAsync();
+
+				return RedirectToAction("Index", "Home");
+			}
+			catch (Exception ex)
+			{
+				ModelState.AddModelError(string.Empty, $"Ocurrió un error al registrar la entrada: {ex.Message}");
+				return View(model);
+			}
+		}
+
+		[HttpPost]
+		public IActionResult GenerarInforme(string nombreArchivo)
+		{
+			var informeData = ObtenerDatosInforme();
+			var filePath = GuardarInformeEnArchivo(nombreArchivo, informeData);
+
+			// Retorna un FileResult para que el navegador descargue el archivo
+			return File(filePath, "text/plain", $"{nombreArchivo}.txt");
+		}
+
+		private IEnumerable<InformeViewModel> ObtenerDatosInforme()
+		{
+			throw new NotImplementedException();
+		}
+
+		private string GuardarInformeEnArchivo(string nombreArchivo, IEnumerable<InformeViewModel> informeData)
+		{
+			// Lógica para guardar los datos en el archivo con el formato especificado
+			var filePath = Path.Combine("wwwroot/informes", $"{nombreArchivo}.txt");
+
+			try
+			{
+				using (StreamWriter sw = new StreamWriter(filePath))
+				{
+					sw.WriteLine("Núm. placa\tTiempo estacionado (min.)\tCantidad a pagar");
+
+					foreach (var informe in informeData)
+					{
+						sw.WriteLine($"{informe.NumPlaca}\t{informe.TiempoEstacionado}\t{informe.CantidadPagar}");
+					}
+				}
+				ViewBag.Message = "Informe generado correctamente.";
+			}
+			catch (Exception ex)
+			{
+				ViewBag.Message = $"Error al generar el informe: {ex.Message}";
+			}
+			return filePath;
 		}
 	}
 }

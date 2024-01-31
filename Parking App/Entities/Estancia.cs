@@ -16,6 +16,7 @@ namespace Parking_App.Entities
 		[ForeignKey("Vehiculo")]
 		public int VehiculoId { get; set; }
 		public Vehiculo Vehiculo { get; set; }
+		public Boolean Pagado { get; set; } = false;
 
 	}
 }
