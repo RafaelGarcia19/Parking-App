@@ -11,6 +11,7 @@ namespace Parking_App.Entities
 		public DateTime HoraEmision { get; set; } = DateTime.Now;
 
 		[Required(ErrorMessage = "El campo {0} es requerido")]
+		[Column(TypeName = "decimal(8,2)")]
 		public decimal ImporteCobrado { get; set; }
 
 		[Required(ErrorMessage = "El campo {0} es requerido")]

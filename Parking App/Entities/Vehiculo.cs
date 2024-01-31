@@ -15,7 +15,7 @@ namespace Parking_App.Entities
 		[Required(ErrorMessage = "El campo TipoVehiculo es requerido")]
 		[ForeignKey("TipoVehiculo")]
 		public int IdTipoVehiculo { get; set; }
-		public virtual TipoVehiculo TipoVehiculo { get; set; } = null!;
+		public TipoVehiculo TipoVehiculo { get; set; } = null!;
 
 		[Display(Name = "Estado")]
 		[DefaultValue(true)]

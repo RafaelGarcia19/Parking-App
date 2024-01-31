@@ -40,7 +40,7 @@ namespace Parking_App.Controllers
 			var totalMinutes = 0;
 			if (estancia.Vehiculo.TipoVehiculo.Nombre == "Residente")
 			{
-				var estancias = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).Where(x => x.VehiculoId == estancia.VehiculoId).Where(x => x.HoraSalida != null).ToList();
+				var estancias = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).Where(x => x.VehiculoId == estancia.VehiculoId).Where(x => x.HoraSalida != null).Where(x => x.Pagado == false).ToList();
 				foreach (var item in estancias)
 				{
 					totalMinutes += calculateMinutes(item.HoraIngreso, item.HoraSalida.Value);
@@ -74,16 +74,16 @@ namespace Parking_App.Controllers
 			try
 			{
 				var estancia = context.Estancias.Include(x => x.Vehiculo).Include(x => x.Vehiculo.TipoVehiculo).FirstOrDefault(x => x.Id == model.Id);
-				if (estancia == null)
-					return RedirectToAction("Index");
-				if (estancia.Vehiculo.TipoVehiculo.Nombre == NoResidente)
-					CrearTicket(model, estancia);
-				estancia.HoraSalida = model.HoraSalida;
-				if (estancia.Vehiculo.TipoVehiculo.Nombre != Residente)
-					estancia.Pagado = true;
-				context.Estancias.Update(estancia);
-				await context.SaveChangesAsync();
+			if (estancia == null)
 				return RedirectToAction("Index");
+			if (estancia.Vehiculo.TipoVehiculo.Nombre == NoResidente)
+				CrearTicket(model, estancia);
+			estancia.HoraSalida = model.HoraSalida;
+			if (estancia.Vehiculo.TipoVehiculo.Nombre != Residente)
+				estancia.Pagado = true;
+			context.Estancias.Update(estancia);
+			await context.SaveChangesAsync();
+			return RedirectToAction("Index");
 			}
 			catch (Exception ex)
 			{
@@ -246,7 +246,6 @@ namespace Parking_App.Controllers
 
 		private string GuardarInformeEnArchivo(string nombreArchivo, IEnumerable<InformeViewModel> informeData)
 		{
-			// Lógica para guardar los datos en el archivo con el formato especificado
 			var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "informes");
 			var filePath = Path.Combine(path, $"{nombreArchivo}.txt");
 
